@@ -1,18 +1,18 @@
 import express from 'express';
 import 'dotenv/config'
 import './database.js'
-import adminRotes from './routes/adminRoutes.js'
+import adminRoutes from './routes/adminRoutes.js';
 
 const app = express();
-app.use('/', adminRotes)
 app.get('/testing',(req, res)=>
 {
-   res.send({
-     message: 'api is workng',
-     code: 200
-   })
+  res.send({
+    message: 'api is workng',
+    code: 200
+  })
 })
 
+app.use('/', adminRoutes)
 
 app.listen(process.env.PORT || 3000, ()=>
 {

@@ -9,4 +9,4 @@ router.get('/admin', (req, res)=>
     })
 });
 
-module.exports = router;
+export { router as default };
