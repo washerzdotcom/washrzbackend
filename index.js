@@ -6,8 +6,10 @@ import customerRoutes from './routes/customerRoutes.js'
 import AppError from './utills/appError.js';
 const app = express();
 
-app.get('/',(req, res)=>
+app.get('/test',(req, res)=>
 {
+  console.log("get dataparams--->> ", req.params);
+  console.log("req.querrt==> ", req.query)
   res.send({
     message: 'api is workng',
     code: 200
