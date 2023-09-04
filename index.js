@@ -16,6 +16,13 @@ app.get('/',(req, res)=>
 app.use(express.json())
 app.use('/api/v1', customerRoutes);
 
+app.post('/addPickup', (req, res)=>
+{
+   console.log("this is the pickups--->>> ", req.body)
+   res.json({
+    status: 'sucess'
+   })
+})
 app.all('*', (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
 });
