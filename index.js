@@ -21,7 +21,7 @@ app.use('/api/v1', customerRoutes);
 app.post('/addPickup', (req, res)=>
 {
    console.log("this is the pickups--->>> ", req.body)
-   res.json({
+   res.status(200).json({
     status: 'sucess'
    })
 })
