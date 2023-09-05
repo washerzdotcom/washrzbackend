@@ -45,21 +45,6 @@ export const addPickup = catchAsync(async (req, res, next) =>
      })
 });
 
-//1.  export const getPickups = catchAsync(async (req, res, next) =>
-// {
-//      const page = req.query.page || 1;
-//      const limit = req.query.limit || 10;
-//      const skip = (page - 1) * limit;
-//      const pickups = await pickup.find().skip(skip).limit(limit);
-//      const countTotal = await pickups.find().count();
-//      res.status(200).json({
-//         Pickups: pickups,
-//         total: countTotal,
-//         message: 'Pickup Getted Sucessfully',
-//      })
-// });
-
-
 export const getPickups = catchAsync(async (req, res, next) => {
   const page = parseInt(req.query.page) || 1; // Use parseInt to ensure page and limit are numbers
   const limit = parseInt(req.query.limit) || 10;
