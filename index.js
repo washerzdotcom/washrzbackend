@@ -4,6 +4,7 @@ import './database.js'
 import adminRoutes from './routes/adminRoutes.js';
 import customerRoutes from './routes/customerRoutes.js'
 import AppError from './utills/appError.js';
+import cors from 'cors'
 const app = express();
 
 app.get('/test',(req, res)=>
