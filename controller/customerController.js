@@ -31,9 +31,9 @@ export const getCustomers = catchAsync(async (req, res, next) =>
 
 export const addPickup = catchAsync(async (req, res, next) =>
 {
-     const {name, contact, addresss} = req.body;
-     console.log("0000>> ", {name, contact, addresss})
-     await pickup.create({Name: name, Contact: contact, Address: addresss})
+     const {name, contact, address} = req.body;
+     console.log("0000>> ", {name, contact, address})
+     await pickup.create({Name: name, Contact: contact, Address: address})
      res.status(200).json({
         message: 'Pickup Added Sucessfully',
      })

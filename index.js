@@ -16,6 +16,7 @@ app.get('/test',(req, res)=>
   })
 })
 app.use(express.json())
+app.use(cors());
 app.use('/api/v1', customerRoutes);
 
 app.post('/addPickup', (req, res)=>
