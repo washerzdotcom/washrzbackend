@@ -41,7 +41,7 @@ app.use((err, req, res, next)=>
 
 io.on('connection', (socket) => {
   console.log("hii this is the socket id--->> ", socket.id);
-  // socket.emit('connect', {message: 'a new client connected'})
+  socket.emit('connect', {message: 'a new client connected'})
 })
    
 server.listen(process.env.PORT || 3000, ()=>
