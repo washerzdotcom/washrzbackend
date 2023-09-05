@@ -17,16 +17,22 @@ export const addCustomer = catchAsync(async (req, res, next) =>
 
 export const getCustomers = catchAsync(async (req, res, next) =>
 {
-     const page = req.query.page || 1;
-     const limit = req.query.limit || 10;
-     const skip = (page - 1) * limit;
-     const customers = await customer.find().skip(skip).limit(limit);
-     const countTotal = await customer.find().count();
-     console.log("hiii ", countTotal)
-     res.status(200).json({
-        result: customers,
-        message: 'Customer Getting Sucessfully',
-     })
+   const page = parseInt(req.query.page) || 1;
+   const limit = parseInt(req.query.limit) || 10;
+ 
+   const skip = (page - 1) * limit;
+ 
+   // Use a single query to get both customers and count
+   const [customers, countTotal] = await Promise.all([
+     customer.find().skip(skip).limit(limit),
+     customer.countDocuments(),
+   ]);
+ 
+   res.status(200).json({
+     result: customers,
+     total: countTotal,
+     message: 'Customers Retrieved Successfully',
+   });
 });
 
 export const addPickup = catchAsync(async (req, res, next) =>
@@ -39,15 +45,38 @@ export const addPickup = catchAsync(async (req, res, next) =>
      })
 });
 
-export const getPickups = catchAsync(async (req, res, next) =>
-{
-     const page = req.query.page || 1;
-     const limit = req.query.limit || 10;
-     const skip = (page - 1) * limit;
-     const pickups = await pickup.find().skip(skip).limit(limit);;
-     res.status(200).json({
-        Pickups: pickups,
-        message: 'Pickup Getted Sucessfully',
-     })
+//1.  export const getPickups = catchAsync(async (req, res, next) =>
+// {
+//      const page = req.query.page || 1;
+//      const limit = req.query.limit || 10;
+//      const skip = (page - 1) * limit;
+//      const pickups = await pickup.find().skip(skip).limit(limit);
+//      const countTotal = await pickups.find().count();
+//      res.status(200).json({
+//         Pickups: pickups,
+//         total: countTotal,
+//         message: 'Pickup Getted Sucessfully',
+//      })
+// });
+
+
+export const getPickups = catchAsync(async (req, res, next) => {
+  const page = parseInt(req.query.page) || 1; // Use parseInt to ensure page and limit are numbers
+  const limit = parseInt(req.query.limit) || 10;
+
+  // Calculate the skip value once
+  const skip = (page - 1) * limit;
+
+  // Use a single query to get both pickups and count
+  const [pickups, countTotal] = await Promise.all([
+   pickup.find().skip(skip).limit(limit),
+   pickup.countDocuments(),
+  ]);
+
+  res.status(200).json({
+    Pickups: pickups,
+    total: countTotal,
+    message: 'Pickup Retrieved Successfully',
+  });
 });
 
