@@ -82,7 +82,7 @@ export const deletePickup = catchAsync(async (req, res, next) => {
 export const addSchedulePickup = catchAsync(async (req, res, next) => {
   const { customerName, whatsappNo, address, slot } =
     req.body;
-  console.log("0000>> ", {
+  console.log("0000>>sh ", {
     customerName,
     whatsappNo,
     address,
