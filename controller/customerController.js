@@ -118,3 +118,13 @@ export const getSchedulePickups = catchAsync(async (req, res, next) => {
     message: "SchedulePickups Retrieved Successfully",
   });
 });
+
+export const deleteSchedulePickup = catchAsync(async (req, res, next) => {
+  const pickupData = await schedulePickup.findByIdAndDelete(req.params.id);
+  if (!pickupData) {
+    return next(new AppError("No pickup found with that ID", 404));
+  }
+  res.status(200).json({
+    message: "Schedule Pickup Deleted Sucessfully",
+  });
+});

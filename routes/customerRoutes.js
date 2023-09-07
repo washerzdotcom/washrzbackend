@@ -4,6 +4,7 @@ import {
   addPickup,
   addSchedulePickup,
   deletePickup,
+  deleteSchedulePickup,
   getCustomers,
   getPickups,
   getSchedulePickups,
@@ -17,5 +18,6 @@ router.get("/getSchedulePickups", getSchedulePickups);
 router.post("/addCustomer", addCustomer);
 router.get("/getCustomers", getCustomers);
 router.delete("/deletePickup/:id", deletePickup)
+router.delete("/deleteSchedulePickup/:id", deleteSchedulePickup)
 
 export { router as default };

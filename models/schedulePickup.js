@@ -6,7 +6,8 @@ const schema = new pickupSchema(
         customerName: String,
         whatsappNo: String,
         address: String,
-        slotPickupStatus: String
+        slot: String,
+        PickupStatus: String
     },
     { timestamps: true }
 )
