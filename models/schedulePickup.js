@@ -3,8 +3,7 @@ const pickupSchema = mongoose.Schema;
 
 const schema = new pickupSchema(
     {
-        timeStamp: String,
-        CustomerName: String,
+        customerName: String,
         whatsappNo: String,
         address: String,
         slotPickupStatus: String
