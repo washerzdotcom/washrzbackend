@@ -1,15 +1,18 @@
 import customer from '../models/customerSchema.js'
 import pickup from '../models/pickupSchema.js';
+import schedulePickup from '../models/schedulePickup.js';
 import AppError from '../utills/appError.js';
 import catchAsync from '../utills/catchAsync.js';
 export const addCustomer = catchAsync(async (req, res, next) =>
 {
      const {name, address, mobile, date} = req.body;
+     const socket = req.socket;
      if(!name || !address || ! mobile || !date)
      {
        return next(new AppError('Please fill the all field', 404))
      }
      await customer.create({Name: name, Address: address, Phone: mobile, Date: date});
+     socket.emit('customeradded', { message: "customer added sucessfully" })
      res.status(200).json({
         message: 'Customer Sucessfully Added'
      })
@@ -56,6 +59,36 @@ export const getPickups = catchAsync(async (req, res, next) => {
   const [pickups, countTotal] = await Promise.all([
    pickup.find().skip(skip).limit(limit),
    pickup.countDocuments(),
+  ]);
+
+  res.status(200).json({
+    Pickups: pickups,
+    total: countTotal,
+    message: 'Pickup Retrieved Successfully',
+  });
+});
+
+export const addSchedulePickup = catchAsync(async (req, res, next) =>
+{
+     const {timeStamp, CustomerName, whatsappNo, address, slotPickupStatus} = req.body;
+     console.log("0000>> ", {timeStamp, CustomerName, whatsappNo, address, slotPickupStatus})
+     await schedulePickup.create({timeStamp, CustomerName, whatsappNo, address, slotPickupStatus} )
+     res.status(200).json({
+        message: 'Pickup Added Sucessfully',
+     })
+});
+
+export const getSchedulePickups = catchAsync(async (req, res, next) => {
+  const page = parseInt(req.query.page) || 1; // Use parseInt to ensure page and limit are numbers
+  const limit = parseInt(req.query.limit) || 10;
+
+  // Calculate the skip value once
+  const skip = (page - 1) * limit;
+
+  // Use a single query to get both pickups and count
+  const [pickups, countTotal] = await Promise.all([
+    schedulePickup.find().skip(skip).limit(limit),
+    schedulePickup.countDocuments(),
   ]);
 
   res.status(200).json({
