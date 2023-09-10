@@ -150,18 +150,6 @@ export const getOrders = catchAsync(async (req, res, next) => {
 
   // Calculate the skip value once
   const skip = (page - 1) * limit;
-  if(req?.params?.number)
-  {
-      const orderByContact = await order.find({
-        contactNo: req.params.id
-      });
-
-      return res.status(200).json({
-        orderByContact,
-        message: "order Retrieved Successfully",
-      });
-  }
-
   // Use a single query to get both pickups and count
   const [orders, countTotal] = await Promise.all([
     order.find().skip(skip).limit(limit),
