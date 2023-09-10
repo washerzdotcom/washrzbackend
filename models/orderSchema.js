@@ -1,20 +1,23 @@
 import mongoose from 'mongoose';
-const orderSchema = mongoose.Schema;
 
-const schema = new orderSchema(
-    {
-        orderNo: Number,
-        name: String,
-        Phone: Number,
-        Address: String,
-        status: {
-            type: String,
-            enum : ['Pending','Ready for Delivery'],
-            default: 'Delivered'
-        }
-    },
-    { timestamps: true }
-)
+const { Schema } = mongoose; // Use destructuring to access the Schema object
 
-const order = mongoose.model('order', schema);
+const itemSchema = new Schema({ // Use 'Schema' instead of 'mongoose.Schema'
+    group: String,
+    type: String,
+    wearType: String,
+    weight: Number,
+    quantity: Number,
+    price: Number // Use lowercase 'price' instead of 'Price'
+});
+
+const schema = new Schema({
+    contactNo: String,
+    customerName: String,
+    address: String,
+    items: [itemSchema],
+    price: Number
+}, { timestamps: true });
+
+const order = mongoose.model('Order', schema); // Capitalize the model name
 export default order;

@@ -1,4 +1,5 @@
 import customer from "../models/customerSchema.js";
+import order from "../models/orderSchema.js";
 import pickup from "../models/pickupSchema.js";
 import schedulePickup from "../models/schedulePickup.js";
 import AppError from "../utills/appError.js";
@@ -80,19 +81,18 @@ export const deletePickup = catchAsync(async (req, res, next) => {
 });
 
 export const addSchedulePickup = catchAsync(async (req, res, next) => {
-  const { customerName, whatsappNo, address, slot } =
-    req.body;
+  const { customerName, whatsappNo, address, slot } = req.body;
   console.log("0000>>sh ", {
     customerName,
     whatsappNo,
     address,
-    slot
+    slot,
   });
   await schedulePickup.create({
     customerName,
     whatsappNo,
     address,
-    slot
+    slot,
   });
   res.status(200).json({
     message: "SchedulePickup Added Sucessfully",
@@ -126,5 +126,64 @@ export const deleteSchedulePickup = catchAsync(async (req, res, next) => {
   }
   res.status(200).json({
     message: "Schedule Pickup Deleted Sucessfully",
+  });
+});
+
+export const addOrder = catchAsync(async (req, res, next) => {
+  const { contactNo, customerName, address, items, price } = req.body;
+  console.log("0000>>or ", { contactNo, customerName, address, items, price });
+  await order.create({
+    contactNo,
+    customerName,
+    address,
+    items,
+    price,
+  });
+  res.status(200).json({
+    message: "Order Added Sucessfully",
+  });
+});
+
+export const getOrders = catchAsync(async (req, res, next) => {
+  const page = parseInt(req.query.page) || 1; // Use parseInt to ensure page and limit are numbers
+  const limit = parseInt(req.query.limit) || 10;
+
+  // Calculate the skip value once
+  const skip = (page - 1) * limit;
+  if(req?.params?.number)
+  {
+      const orderByContact = await order.find({
+        contactNo: req.params.id
+      });
+
+      return res.status(200).json({
+        orderByContact,
+        message: "order Retrieved Successfully",
+      });
+  }
+
+  // Use a single query to get both pickups and count
+  const [orders, countTotal] = await Promise.all([
+    order.find().skip(skip).limit(limit),
+    order.countDocuments(),
+  ]);
+
+  res.status(200).json({
+    orders: orders,
+    total: countTotal,
+    message: "orders Retrieved Successfully",
+  });
+});
+
+export const getOrderTotalBill = catchAsync(async (req, res, next) => {
+  const Price = await order
+    .findOne({
+      contactNo: req.params.number,
+    })
+    .select("price -_id");
+
+  return res.status(200).json({
+    Price,
+    message: "Price Retrieved Successfully",
   });
 });
