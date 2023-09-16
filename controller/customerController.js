@@ -2,6 +2,7 @@ import customer from "../models/customerSchema.js";
 import order from "../models/orderSchema.js";
 import pickup from "../models/pickupSchema.js";
 import schedulePickup from "../models/schedulePickup.js";
+import APIFeatures from "../utills/apiFeatures.js";
 import AppError from "../utills/appError.js";
 import catchAsync from "../utills/catchAsync.js";
 export const addCustomer = catchAsync(async (req, res, next) => {
@@ -23,14 +24,8 @@ export const addCustomer = catchAsync(async (req, res, next) => {
 });
 
 export const getCustomers = catchAsync(async (req, res, next) => {
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
-
-  const skip = (page - 1) * limit;
-
-  // Use a single query to get both customers and count
   const [customers, countTotal] = await Promise.all([
-    customer.find().skip(skip).limit(limit),
+    new APIFeatures(customer.find(), req.query).sort().limitFields().paginate().query,
     customer.countDocuments(),
   ]);
 
@@ -43,7 +38,6 @@ export const getCustomers = catchAsync(async (req, res, next) => {
 
 export const addPickup = catchAsync(async (req, res, next) => {
   const { name, contact, address } = req.body;
-  console.log("0000>> ", { name, contact, address });
   await pickup.create({ Name: name, Contact: contact, Address: address });
   res.status(200).json({
     message: "Pickup Added Sucessfully",
@@ -51,18 +45,11 @@ export const addPickup = catchAsync(async (req, res, next) => {
 });
 
 export const getPickups = catchAsync(async (req, res, next) => {
-  const page = parseInt(req.query.page) || 1; // Use parseInt to ensure page and limit are numbers
-  const limit = parseInt(req.query.limit) || 10;
-
-  // Calculate the skip value once
-  const skip = (page - 1) * limit;
-
-  // Use a single query to get both pickups and count
   const [pickups, countTotal] = await Promise.all([
-    pickup.find().skip(skip).limit(limit),
+    new APIFeatures(pickup.find(), req.query).sort().limitFields().paginate().query,
     pickup.countDocuments(),
   ]);
-
+ 
   res.status(200).json({
     Pickups: pickups,
     total: countTotal,
@@ -82,12 +69,6 @@ export const deletePickup = catchAsync(async (req, res, next) => {
 
 export const addSchedulePickup = catchAsync(async (req, res, next) => {
   const { customerName, whatsappNo, address, slot } = req.body;
-  console.log("0000>>sh ", {
-    customerName,
-    whatsappNo,
-    address,
-    slot,
-  });
   await schedulePickup.create({
     customerName,
     whatsappNo,
@@ -100,15 +81,8 @@ export const addSchedulePickup = catchAsync(async (req, res, next) => {
 });
 
 export const getSchedulePickups = catchAsync(async (req, res, next) => {
-  const page = parseInt(req.query.page) || 1; // Use parseInt to ensure page and limit are numbers
-  const limit = parseInt(req.query.limit) || 10;
-
-  // Calculate the skip value once
-  const skip = (page - 1) * limit;
-
-  // Use a single query to get both pickups and count
   const [pickups, countTotal] = await Promise.all([
-    schedulePickup.find().skip(skip).limit(limit),
+    new APIFeatures(schedulePickup.find(), req.query).sort().limitFields().paginate().query,
     schedulePickup.countDocuments(),
   ]);
 
@@ -131,7 +105,6 @@ export const deleteSchedulePickup = catchAsync(async (req, res, next) => {
 
 export const addOrder = catchAsync(async (req, res, next) => {
   const { contactNo, customerName, address, items, price } = req.body;
-  console.log("0000>>or ", { contactNo, customerName, address, items, price });
   await order.create({
     contactNo,
     customerName,
@@ -145,14 +118,8 @@ export const addOrder = catchAsync(async (req, res, next) => {
 });
 
 export const getOrders = catchAsync(async (req, res, next) => {
-  const page = parseInt(req.query.page) || 1; // Use parseInt to ensure page and limit are numbers
-  const limit = parseInt(req.query.limit) || 10;
-
-  // Calculate the skip value once
-  const skip = (page - 1) * limit;
-  // Use a single query to get both pickups and count
   const [orders, countTotal] = await Promise.all([
-    order.find().skip(skip).limit(limit),
+    new APIFeatures(order.find(), req.query).sort().limitFields().paginate().query,
     order.countDocuments(),
   ]);
 
