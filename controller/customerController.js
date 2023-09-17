@@ -76,7 +76,7 @@ export const addSchedulePickup = catchAsync(async (req, res, next) => {
     address,
     slot,
   });
-  req.socket.emit('addPickup', schedulePickupData)
+  req.socket.emit('addSchedulePickup', schedulePickupData)
   res.status(200).json({
     message: "SchedulePickup Added Sucessfully",
   });
