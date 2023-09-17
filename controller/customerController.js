@@ -38,7 +38,8 @@ export const getCustomers = catchAsync(async (req, res, next) => {
 
 export const addPickup = catchAsync(async (req, res, next) => {
   const { name, contact, address } = req.body;
-  await pickup.create({ Name: name, Contact: contact, Address: address });
+  const pickupData = await pickup.create({ Name: name, Contact: contact, Address: address });
+  req.socket.emit('addPickup', pickupData)
   res.status(200).json({
     message: "Pickup Added Sucessfully",
   });
@@ -69,12 +70,13 @@ export const deletePickup = catchAsync(async (req, res, next) => {
 
 export const addSchedulePickup = catchAsync(async (req, res, next) => {
   const { customerName, whatsappNo, address, slot } = req.body;
-  await schedulePickup.create({
+  const schedulePickupData = await schedulePickup.create({
     customerName,
     whatsappNo,
     address,
     slot,
   });
+  req.socket.emit('addPickup', schedulePickupData)
   res.status(200).json({
     message: "SchedulePickup Added Sucessfully",
   });
