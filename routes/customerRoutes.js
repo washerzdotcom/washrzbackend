@@ -6,6 +6,7 @@ import {
   addSchedulePickup,
   deletePickup,
   deleteSchedulePickup,
+  getCancelPickup,
   getCustomers,
   getOrderTotalBill,
   getOrders,
@@ -20,11 +21,11 @@ router.post("/addSchedulePickup", addSchedulePickup);
 router.get("/getSchedulePickups", getSchedulePickups);
 router.post("/addCustomer", addCustomer);
 router.get("/getCustomers", getCustomers);
-router.delete("/deletePickup/:id", deletePickup)
-router.delete("/deleteSchedulePickup/:id", deleteSchedulePickup)
+router.put("/deletePickup/:id", deletePickup)
 
 router.post('/addOrder', addOrder)
 router.get('/getOrders', getOrders)
 router.get('/getOrderBill/:number', getOrderTotalBill)
+router.get('/getCancelPickups', getCancelPickups)
 
 export { router as default };

@@ -6,6 +6,10 @@ const schema = new pickupSchema(
         Name: String,
         Contact: String,
         Address: String,
+        slot: {type: String, default: 'NA'},
+        PickupStatus: String,
+        type: String,
+        isDeleted: { type: Boolean, default: false }
     },
     { timestamps: true }
 )

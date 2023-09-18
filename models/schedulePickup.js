@@ -3,11 +3,12 @@ const pickupSchema = mongoose.Schema;
 
 const schema = new pickupSchema(
     {
-        customerName: String,
-        whatsappNo: String,
-        address: String,
+        Name: String,
+        Contact: String,
+        Address: String,
         slot: String,
-        PickupStatus: String
+        PickupStatus: String,
+        isDeleted: { type: Boolean, default: false }
     },
     { timestamps: true }
 )
