@@ -78,9 +78,9 @@ export const deletePickup = catchAsync(async (req, res, next) => {
 export const addSchedulePickup = catchAsync(async (req, res, next) => {
   const { name, contact, address, slot } = req.body;
   const schedulePickupData = await pickup.create({
-    name,
-    contact,
-    address,
+    Name: name,
+    Contact: contact,
+    Address: address,
     slot,
     type: 'schedule'
   });
