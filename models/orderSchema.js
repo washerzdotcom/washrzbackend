@@ -3,12 +3,12 @@ import mongoose from 'mongoose';
 const { Schema } = mongoose; // Use destructuring to access the Schema object
 
 const itemSchema = new Schema({ // Use 'Schema' instead of 'mongoose.Schema'
-    group: String,
-    type: String,
-    wearType: String,
-    weight: Number,
+    heading: String,
+    subHeading: String,
+    viewPrice: String,
     quantity: Number,
-    price: Number // Use lowercase 'price' instead of 'Price'
+    price: Number,
+    newQtyPrice: Number // Use lowercase 'price' instead of 'Price'
 });
 
 const schema = new Schema({
