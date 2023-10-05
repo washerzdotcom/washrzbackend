@@ -108,12 +108,22 @@ export const getSchedulePickups = catchAsync(async (req, res, next) => {
 
 export const addOrder = catchAsync(async (req, res, next) => {
   const { contactNo, customerName, address, items, price } = req.body;
+  const latestOrder =await order.find().sort({_id: -1})
+  console.log("this is the latesoder---> ", latestOrder)
+  let order_id = `WZ1001`
+  if(latestOrder.length > 0)
+  {
+    order_id = ((latestOrder[0].order_id.split('WZ')[1]*1)+1);
+    order_id = 'WZ'+order_id
+    console.log("updated order id---> ", order_id)
+  }
   await order.create({
     contactNo,
     customerName,
     address,
     items,
     price,
+    order_id
   });
   res.status(200).json({
     message: "Order Added Sucessfully",

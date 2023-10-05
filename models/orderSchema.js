@@ -16,7 +16,8 @@ const schema = new Schema({
     customerName: String,
     address: String,
     items: [itemSchema],
-    price: Number
+    price: Number,
+    order_id: String
 }, { timestamps: true });
 
 const order = mongoose.model('Order', schema); // Capitalize the model name
