@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['admin', 'rider', 'plant-manager'],
+    enum: ['customer', 'admin', 'rider', 'plant-manager'],
     default: 'admin'
   },
   password: {
@@ -114,4 +114,4 @@ userSchema.methods.createPasswordResetToken = function() {
 
 const User = mongoose.model('User', userSchema);
 
-module.exports = User;
+export default User;

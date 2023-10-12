@@ -1,7 +1,7 @@
 import express from "express";
 import "dotenv/config";
 import "./database.js";
-import adminRoutes from "./routes/adminRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
 import customerRoutes from "./routes/customerRoutes.js";
 import AppError from "./utills/appError.js";
 import http from "http";
@@ -29,9 +29,10 @@ app.get("/test", (req, res) => {
   });
 });
 app.use(express.json());
-app.use(cors());
+app.use(cors());  
 app.use(addSocketToRequest(io));
 app.use("/api/v1", customerRoutes);
+app.use("/api/v1/auth", authRoutes);
 app.all("*", (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
 });

@@ -1,41 +1,49 @@
 import crypto from 'crypto';
 import { promisify } from 'util';
 import jwt from 'jsonwebtoken';
-import User from './../models/userModel';
-import catchAsync from './../utils/catchAsync';
-import AppError from './../utils/appError';
-import Email from './../utils/email';
+import catchAsync from '../utills/catchAsync.js';
+import AppError from '../utills/appError.js';
+// import Email from './../utils/email';
+import User from '../models/userModel.js'
 
-const signToken = id => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN
+
+const signAccToken = (id, type) => {
+  return jwt.sign({ id, userType: type }, process.env.JWT_SECRET, {
+    expiresIn: process.env.ACC_JWT_EXPIRES_IN
   });
 };
 
-const createSendToken = (user, statusCode, req, res) => {
-  const token = signToken(user._id);
-
-  res.cookie('jwt', token, {
-    expires: new Date(
-      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
-    ),
-    httpOnly: true,
-    secure: req.secure || req.headers['x-forwarded-proto'] === 'https'
+const signRefToken = (id, type) => {
+  return jwt.sign({ id, userType: type }, process.env.JWT_SECRET, {
+    expiresIn: process.env.REF_JWT_EXPIRES_IN
   });
+}
+
+const createSendToken = (user, type, statusCode, req, res) => {
+  const accessToken = signAccToken(user._id, type);
+  const refreshToken = signRefToken(user._id, type);
+
+  // res.cookie('jwt', token, {
+  //   expires: new Date(
+  //     Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+  //   ),
+  //   httpOnly: true,
+  //   secure: req.secure || req.headers['x-forwarded-proto'] === 'https'
+  // });
 
   // Remove password from output
   user.password = undefined;
 
   res.status(statusCode).json({
     status: 'success',
-    token,
+    tokens: {accessToken, refreshToken},
     data: {
       user
     }
   });
 };
 
-exports.signup = catchAsync(async (req, res, next) => {
+export const signup = catchAsync(async (req, res, next) => {
   const newUser = await User.create({
     name: req.body.name,
     email: req.body.email,
@@ -50,14 +58,16 @@ exports.signup = catchAsync(async (req, res, next) => {
   createSendToken(newUser, 201, req, res);
 });
 
-exports.login = catchAsync(async (req, res, next) => {
+export const login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
-
+  console.log("this is email anfd password", { email, password })
   // 1) Check if email and password exist
   if (!email || !password) {
     return next(new AppError('Please provide email and password!', 400));
   }
   // 2) Check if user exists && password is correct
+  const us = await User.find();
+  console.log("this is user---->>> ", us)
   const user = await User.findOne({ email }).select('+password');
 
   if (!user || !(await user.correctPassword(password, user.password))) {
@@ -65,10 +75,10 @@ exports.login = catchAsync(async (req, res, next) => {
   }
 
   // 3) If everything ok, send token to client
-  createSendToken(user, 200, req, res);
+  createSendToken(user, user.role, 200, req, res);
 });
 
-exports.logout = (req, res) => {
+export const logout = (req, res) => {
   res.cookie('jwt', 'loggedout', {
     expires: new Date(Date.now() + 10 * 1000),
     httpOnly: true
@@ -76,7 +86,7 @@ exports.logout = (req, res) => {
   res.status(200).json({ status: 'success' });
 };
 
-exports.protect = catchAsync(async (req, res, next) => {
+export const protect = catchAsync(async (req, res, next) => {
   // 1) Getting token and check of it's there
   let token;
   if (
@@ -122,7 +132,7 @@ exports.protect = catchAsync(async (req, res, next) => {
 });
 
 // Only for rendered pages, no errors!
-exports.isLoggedIn = async (req, res, next) => {
+export const isLoggedIn = async (req, res, next) => {
   if (req.cookies.jwt) {
     try {
       // 1) verify token
@@ -152,7 +162,7 @@ exports.isLoggedIn = async (req, res, next) => {
   next();
 };
 
-exports.restrictTo = (...roles) => {
+export const restrictTo = (...roles) => {
   return (req, res, next) => {
     // roles ['admin', 'lead-guide']. role='user'
     if (!roles.includes(req.user.role)) {
@@ -165,7 +175,7 @@ exports.restrictTo = (...roles) => {
   };
 };
 
-exports.forgotPassword = catchAsync(async (req, res, next) => {
+export const forgotPassword = catchAsync(async (req, res, next) => {
   // 1) Get user based on POSTed email
   const user = await User.findOne({ email: req.body.email });
   if (!user) {
@@ -199,7 +209,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   }
 });
 
-exports.resetPassword = catchAsync(async (req, res, next) => {
+export const resetPassword = catchAsync(async (req, res, next) => {
   // 1) Get user based on the token
   const hashedToken = crypto
     .createHash('sha256')
@@ -226,7 +236,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, req, res);
 });
 
-exports.updatePassword = catchAsync(async (req, res, next) => {
+export const updatePassword = catchAsync(async (req, res, next) => {
   // 1) Get user from collection
   const user = await User.findById(req.user.id).select('+password');
 
@@ -244,3 +254,24 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   // 4) Log user in, send JWT
   createSendToken(user, 200, req, res);
 });
+
+export const refreshToken = catchAsync(async (req, res, next) => {
+  const { refreshToken } = req.body;
+
+  // Check if the refresh token is valid
+  if (!refreshToken || !refreshToken.includes(refreshToken)) {
+    return res.status(401).send('Invalid refresh token');
+  }
+
+  try {
+    // Verify the refresh token and generate a new access token
+    const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
+    const accessToken = jwt.sign({ id: decoded.id, userType: req.user.role }, process.env.JWT_SECRET, {
+      expiresIn: process.env.ACC_JWT_EXPIRES_IN, // Access token expires in 15 minutes
+    });
+
+    res.json({ accessToken });
+  } catch (error) {
+    res.status(400).send('Invalid Token');
+  }
+})
