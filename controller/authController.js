@@ -1,25 +1,24 @@
-import crypto from 'crypto';
-import { promisify } from 'util';
-import jwt from 'jsonwebtoken';
-import catchAsync from '../utills/catchAsync.js';
-import AppError from '../utills/appError.js';
+import crypto from "crypto";
+import { promisify } from "util";
+import jwt from "jsonwebtoken";
+import catchAsync from "../utills/catchAsync.js";
+import AppError from "../utills/appError.js";
 // import Email from './../utils/email';
-import User from '../models/userModel.js'
-
+import User from "../models/userModel.js";
 
 const signAccToken = (id, type) => {
   return jwt.sign({ id, userType: type }, process.env.JWT_SECRET, {
-    expiresIn: process.env.ACC_JWT_EXPIRES_IN
+    expiresIn: process.env.ACC_JWT_EXPIRES_IN,
   });
 };
 
 const signRefToken = (id, type) => {
   return jwt.sign({ id, userType: type }, process.env.JWT_SECRET, {
-    expiresIn: process.env.REF_JWT_EXPIRES_IN
+    expiresIn: process.env.REF_JWT_EXPIRES_IN,
   });
-}
+};
 
-const createSendToken = (user, type, statusCode, req, res) => {
+const createSendToken = async (user, type, statusCode, req, res) => {
   const accessToken = signAccToken(user._id, type);
   const refreshToken = signRefToken(user._id, type);
 
@@ -31,15 +30,29 @@ const createSendToken = (user, type, statusCode, req, res) => {
   //   secure: req.secure || req.headers['x-forwarded-proto'] === 'https'
   // });
 
+  // Saving refreshToken with current user
+  user.refreshToken = refreshToken;
+  user.passwordConfirm = user.password;
+  const result = await user.save();
+  // console.log("==========================>>user.refreshToken", user.refreshToken);
+
+  // Creates Secure Cookie with refresh token
+  res.cookie("jwt", refreshToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None",
+    maxAge: 24 * 60 * 60 * 1000,
+  });
+
   // Remove password from output
   user.password = undefined;
 
   res.status(statusCode).json({
-    status: 'success',
-    tokens: {accessToken, refreshToken},
+    status: "success",
+    tokens: { accessToken, refreshToken },
     data: {
-      user
-    }
+      user,
+    },
   });
 };
 
@@ -48,30 +61,30 @@ export const signup = catchAsync(async (req, res, next) => {
     name: req.body.name,
     email: req.body.email,
     password: req.body.password,
-    passwordConfirm: req.body.passwordConfirm
+    passwordConfirm: req.body.passwordConfirm,
+    phone: req.body.phone,
+    role: req.body.role,
+    avatar: req.body.avatar,
+    addharCardNo: req.body.addharCardNo
   });
 
-  const url = `${req.protocol}://${req.get('host')}/me`;
+  // const url = `${req.protocol}://${req.get("host")}/me`;
   // console.log(url);
-  await new Email(newUser, url).sendWelcome();
+  // await new Email(newUser, url).sendWelcome();
 
-  createSendToken(newUser, 201, req, res);
+  createSendToken(newUser, newUser.role, 201, req, res);
 });
 
 export const login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
-  console.log("this is email anfd password", { email, password })
   // 1) Check if email and password exist
   if (!email || !password) {
-    return next(new AppError('Please provide email and password!', 400));
+    return next(new AppError("Please provide email and password!", 400));
   }
   // 2) Check if user exists && password is correct
-  const us = await User.find();
-  console.log("this is user---->>> ", us)
-  const user = await User.findOne({ email }).select('+password');
-
+  const user = await User.findOne({ email }).select("+password").exec();
   if (!user || !(await user.correctPassword(password, user.password))) {
-    return next(new AppError('Incorrect email or password', 401));
+    return next(new AppError("Incorrect email or password", 401));
   }
 
   // 3) If everything ok, send token to client
@@ -79,11 +92,11 @@ export const login = catchAsync(async (req, res, next) => {
 });
 
 export const logout = (req, res) => {
-  res.cookie('jwt', 'loggedout', {
+  res.cookie("jwt", "loggedout", {
     expires: new Date(Date.now() + 10 * 1000),
-    httpOnly: true
+    httpOnly: true,
   });
-  res.status(200).json({ status: 'success' });
+  res.status(200).json({ status: "success" });
 };
 
 export const protect = catchAsync(async (req, res, next) => {
@@ -91,16 +104,16 @@ export const protect = catchAsync(async (req, res, next) => {
   let token;
   if (
     req.headers.authorization &&
-    req.headers.authorization.startsWith('Bearer')
+    req.headers.authorization.startsWith("Bearer")
   ) {
-    token = req.headers.authorization.split(' ')[1];
+    token = req.headers.authorization.split(" ")[1];
   } else if (req.cookies.jwt) {
     token = req.cookies.jwt;
   }
 
   if (!token) {
     return next(
-      new AppError('You are not logged in! Please log in to get access.', 401)
+      new AppError("You are not logged in! Please log in to get access.", 401)
     );
   }
 
@@ -112,7 +125,7 @@ export const protect = catchAsync(async (req, res, next) => {
   if (!currentUser) {
     return next(
       new AppError(
-        'The user belonging to this token does no longer exist.',
+        "The user belonging to this token does no longer exist.",
         401
       )
     );
@@ -121,7 +134,7 @@ export const protect = catchAsync(async (req, res, next) => {
   // 4) Check if user changed password after the token was issued
   if (currentUser.changedPasswordAfter(decoded.iat)) {
     return next(
-      new AppError('User recently changed password! Please log in again.', 401)
+      new AppError("User recently changed password! Please log in again.", 401)
     );
   }
 
@@ -167,7 +180,7 @@ export const restrictTo = (...roles) => {
     // roles ['admin', 'lead-guide']. role='user'
     if (!roles.includes(req.user.role)) {
       return next(
-        new AppError('You do not have permission to perform this action', 403)
+        new AppError("You do not have permission to perform this action", 403)
       );
     }
 
@@ -179,7 +192,7 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
   // 1) Get user based on POSTed email
   const user = await User.findOne({ email: req.body.email });
   if (!user) {
-    return next(new AppError('There is no user with email address.', 404));
+    return next(new AppError("There is no user with email address.", 404));
   }
 
   // 2) Generate the random reset token
@@ -189,13 +202,13 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
   // 3) Send it to user's email
   try {
     const resetURL = `${req.protocol}://${req.get(
-      'host'
+      "host"
     )}/api/v1/users/resetPassword/${resetToken}`;
     await new Email(user, resetURL).sendPasswordReset();
 
     res.status(200).json({
-      status: 'success',
-      message: 'Token sent to email!'
+      status: "success",
+      message: "Token sent to email!",
     });
   } catch (err) {
     user.passwordResetToken = undefined;
@@ -203,7 +216,7 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
     await user.save({ validateBeforeSave: false });
 
     return next(
-      new AppError('There was an error sending the email. Try again later!'),
+      new AppError("There was an error sending the email. Try again later!"),
       500
     );
   }
@@ -212,18 +225,18 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
 export const resetPassword = catchAsync(async (req, res, next) => {
   // 1) Get user based on the token
   const hashedToken = crypto
-    .createHash('sha256')
+    .createHash("sha256")
     .update(req.params.token)
-    .digest('hex');
+    .digest("hex");
 
   const user = await User.findOne({
     passwordResetToken: hashedToken,
-    passwordResetExpires: { $gt: Date.now() }
+    passwordResetExpires: { $gt: Date.now() },
   });
 
   // 2) If token has not expired, and there is user, set the new password
   if (!user) {
-    return next(new AppError('Token is invalid or has expired', 400));
+    return next(new AppError("Token is invalid or has expired", 400));
   }
   user.password = req.body.password;
   user.passwordConfirm = req.body.passwordConfirm;
@@ -238,11 +251,11 @@ export const resetPassword = catchAsync(async (req, res, next) => {
 
 export const updatePassword = catchAsync(async (req, res, next) => {
   // 1) Get user from collection
-  const user = await User.findById(req.user.id).select('+password');
+  const user = await User.findById(req.user.id).select("+password");
 
   // 2) Check if POSTed current password is correct
   if (!(await user.correctPassword(req.body.passwordCurrent, user.password))) {
-    return next(new AppError('Your current password is wrong.', 401));
+    return next(new AppError("Your current password is wrong.", 401));
   }
 
   // 3) If so, update password
@@ -256,22 +269,19 @@ export const updatePassword = catchAsync(async (req, res, next) => {
 });
 
 export const refreshToken = catchAsync(async (req, res, next) => {
-  const { refreshToken } = req.body;
+  const cookies = req.cookies;
+  console.log("this is the ", cookies)
+  if (!cookies.jwt) return res.sendStatus(401);
+  const refreshToken = cookies.jwt;
 
-  // Check if the refresh token is valid
-  if (!refreshToken || !refreshToken.includes(refreshToken)) {
-    return res.status(401).send('Invalid refresh token');
-  }
+  const foundUser = await User.findOne({ refreshToken });
+  if (!foundUser) return res.sendStatus(403); //Forbidden
 
-  try {
-    // Verify the refresh token and generate a new access token
-    const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
-    const accessToken = jwt.sign({ id: decoded.id, userType: req.user.role }, process.env.JWT_SECRET, {
-      expiresIn: process.env.ACC_JWT_EXPIRES_IN, // Access token expires in 15 minutes
-    });
-
-    res.json({ accessToken });
-  } catch (error) {
-    res.status(400).send('Invalid Token');
-  }
-})
+  // evaluate jwt
+  jwt.verify(refreshToken, process.env.JWT_SECRET, (err, decoded) => {
+    if (err || foundUser._id.toString() !== decoded.id) return res.sendStatus(403);
+    // const roles = Object.values(foundUser.role);
+    const accessToken = signAccToken(decoded.id, decoded.userType);
+    res.json({ role: decoded.role, accessToken, user: foundUser });
+  });
+});

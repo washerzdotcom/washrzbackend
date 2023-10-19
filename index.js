@@ -8,7 +8,17 @@ import http from "http";
 import cors from "cors";
 import { Server } from "socket.io";
 const app = express();
+import cookies from "cookie-parser";
 const server = http.createServer(app);
+app.use(cookies());
+
+app.use(cors({
+  origin: '*',
+  methods: 'GET, POST, PUT, DELETE',
+  credentials: true, // Allow credentials (cookies) to be sent with the request
+}));
+
+
 const io = new Server(server, {
   cors: {
     origin: true,
@@ -29,7 +39,6 @@ app.get("/test", (req, res) => {
   });
 });
 app.use(express.json());
-app.use(cors());  
 app.use(addSocketToRequest(io));
 app.use("/api/v1", customerRoutes);
 app.use("/api/v1/auth", authRoutes);
