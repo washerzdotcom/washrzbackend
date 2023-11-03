@@ -76,6 +76,7 @@ export const signup = catchAsync(async (req, res, next) => {
 });
 
 export const login = catchAsync(async (req, res, next) => {
+  console.log("i am in login----------")
   const { email, password } = req.body;
   // 1) Check if email and password exist
   if (!email || !password) {
