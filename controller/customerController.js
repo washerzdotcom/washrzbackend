@@ -177,8 +177,8 @@ export const getCancelPickups = catchAsync(async (req, res, next) => {
 export const changeOrderStatus = catchAsync(async (req, res, next) =>
 {
    const _id = req.params.id;
-   const status = req.body.status;
-   const updatedOrder = await findOneAndUpdate({_id}, {status});
+   const status = (req.body.status).toLowerCase();
+   const updatedOrder = await order.findOneAndUpdate({_id}, {status});
    res.status(200).json({
     result: updatedOrder,
     message: `Added in ${status} tab`,
