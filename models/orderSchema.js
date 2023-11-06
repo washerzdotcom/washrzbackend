@@ -17,7 +17,8 @@ const schema = new Schema({
     address: String,
     items: [itemSchema],
     price: Number,
-    order_id: String
+    order_id: String,
+    status: {type: String, default: 'intransit'}
 }, { timestamps: true });
 
 const order = mongoose.model('Order', schema); // Capitalize the model name

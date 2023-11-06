@@ -4,6 +4,7 @@ import {
   addOrder,
   addPickup,
   addSchedulePickup,
+  changeOrderStatus,
   deletePickup,
   getCancelPickups,
   getCustomers,
@@ -26,5 +27,6 @@ router.post('/addOrder', addOrder)
 router.get('/getOrders', getOrders)
 router.get('/getOrderBill/:number', getOrderTotalBill)
 router.get('/getCancelPickups', getCancelPickups)
+router.put('/changeOrderStatus/:id', changeOrderStatus)
 
 export { router as default };

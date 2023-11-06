@@ -131,8 +131,9 @@ export const addOrder = catchAsync(async (req, res, next) => {
 });
 
 export const getOrders = catchAsync(async (req, res, next) => {
+  const status = req?.query?.status ?  {status: req?.query?.status} : {$or: [{status: 'intransit'}, {status: ''}]}
   const [orders, countTotal] = await Promise.all([
-    new APIFeatures(order.find(), req.query).sort().limitFields().paginate()
+    new APIFeatures(order.find(status), req.query).sort().limitFields().paginate()
       .query,
     order.countDocuments(),
   ]);
@@ -172,4 +173,15 @@ export const getCancelPickups = catchAsync(async (req, res, next) => {
     message: "Cancelled Pickups Retrieved Successfully",
   });
 });
+
+export const changeOrderStatus = catchAsync(async (req, res, next) =>
+{
+   const _id = req.params.id;
+   const status = req.body.status;
+   const updatedOrder = await findOneAndUpdate({_id}, {status});
+   res.status(200).json({
+    result: updatedOrder,
+    message: `Added in ${status} tab`,
+  });
+})
 
