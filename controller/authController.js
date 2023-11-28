@@ -57,15 +57,31 @@ const createSendToken = async (user, type, statusCode, req, res) => {
 };
 
 export const signup = catchAsync(async (req, res, next) => {
+
+  const {
+    photo,
+    fullName,
+    mobileNumber,
+    email,
+    role,
+    aadhaarCard,
+    drivingLicence,
+    password,
+    confirmPassword
+} = req.body;
+
+console.log("==============================================>> ", req.body)
+
   const newUser = await User.create({
-    name: req.body.name,
-    email: req.body.email,
-    password: req.body.password,
-    passwordConfirm: req.body.passwordConfirm,
-    phone: req.body.phone,
-    role: req.body.role,
-    avatar: req.body.avatar,
-    addharCardNo: req.body.addharCardNo
+    name: fullName,
+    email,
+    password,
+    passwordConfirm: confirmPassword,
+    phone: mobileNumber,
+    role,
+    avatar: '',
+    addharCardNo: aadhaarCard,
+    drivingLicence
   });
 
   // const url = `${req.protocol}://${req.get("host")}/me`;

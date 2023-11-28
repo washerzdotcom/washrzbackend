@@ -66,6 +66,10 @@ const userSchema = new mongoose.Schema({
     maxlength: 16,
     select: false,
   },
+  drivingLicence: {
+    type: String,
+    select: false,
+  },
   refreshToken: String,
   passwordChangedAt: Date,
   passwordResetToken: String,

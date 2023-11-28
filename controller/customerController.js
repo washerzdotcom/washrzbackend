@@ -131,7 +131,8 @@ export const addOrder = catchAsync(async (req, res, next) => {
 });
 
 export const getOrders = catchAsync(async (req, res, next) => {
-  const status = req?.query?.status ?  {status: req?.query?.status} : {$or: [{status: 'intransit'}, {status: ''}]}
+  const status = req?.query?.status ?  {$or: [{status: req?.query?.status}, {status: ''}]} : {$or: [{status: 'intransit'}, {status: ''}]};
+  console.log("here is the status--->> ", status)
   const [orders, countTotal] = await Promise.all([
     new APIFeatures(order.find(status), req.query).sort().limitFields().paginate()
       .query,
