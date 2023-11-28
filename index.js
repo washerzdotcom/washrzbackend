@@ -13,7 +13,7 @@ const server = http.createServer(app);
 app.use(cookies());
 
 app.use(cors({
-  origin: ['http://localhost:3000', 'https://washerzdotcom.onrender.com'],
+  origin: ['http://localhost:3000', 'http://51.20.63.21:5000'],
   methods: 'GET, POST, PUT, DELETE',
   credentials: true, // Allow credentials (cookies) to be sent with the request
 }));
