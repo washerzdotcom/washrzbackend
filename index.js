@@ -21,7 +21,7 @@ app.use(cors({
 
 const io = new Server(server, {
   cors: {
-    origin: true,
+    origin: ['http://localhost:3000', 'https://washrz.vercel.app'],
     credentials: true,
   },
   allowEIO3: true,
