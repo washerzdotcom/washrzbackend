@@ -14,7 +14,7 @@ const server = http.createServer(app);
 app.use(cookies());
 
 app.use(cors({
-  origin: ['https://washrz.vercel.app', 'http://localhost:3000'],
+  origin: ['https://washrz.vercel.app', 'http://localhost:3000' , 'https://washrzdotcom.netlify.app'],
   methods: 'GET, POST, PUT, DELETE',
   credentials: true, // Allow credentials (cookies) to be sent with the request
 }));
@@ -22,7 +22,7 @@ app.use(cors({
 console.log(`The total number of CPUs is ${os.cpus().length}`);
 const io = new Server(server, {
   cors: {
-    origin: ['http://localhost:3000', 'https://washrz.vercel.app', 'http://deploy-washrz-frontend.s3-website.ap-south-1.amazonaws.com'],
+    origin: ['http://localhost:3000', 'https://washrz.vercel.app', 'http://deploy-washrz-frontend.s3-website.ap-south-1.amazonaws.com' ,'https://washrzdotcom.netlify.app'],
     credentials: true,
   },
   allowEIO3: true,
