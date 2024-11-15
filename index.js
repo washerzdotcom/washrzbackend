@@ -22,6 +22,7 @@ app.use(
       "http://localhost:3000",
       "https://washrzdotcom.netlify.app",
       "http://localhost:3001",
+      "http://dep-washrz-dev.s3-website.ap-south-1.amazonaws.com",
     ],
     methods: "GET, POST, PUT, DELETE, PATCH",
     credentials: true, // Allow credentials (cookies) to be sent with the request
@@ -36,6 +37,7 @@ const io = new Server(server, {
       "https://washrz.vercel.app",
       "http://deploy-washrz-frontend.s3-website.ap-south-1.amazonaws.com",
       "https://washrzdotcom.netlify.app",
+      "http://dep-washrz-dev.s3-website.ap-south-1.amazonaws.com",
     ],
     credentials: true,
   },
